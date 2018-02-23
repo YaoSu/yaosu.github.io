@@ -1,0 +1,48 @@
+---
+layout: post
+title:  "PhotoKit学习总结!"
+date:   2018-02-23 20:42:42 +0800
+categories: jekyll update
+---
+
+# 简述
+
+PhotoKit 是iOS8之后推出的一个高效的照片获取和修改框架。比之前的ALAsset在性能上有很大提高。尤其改善了批量获取图片的性能。
+
+## 1.PHPhotoLibrary
+
+PHPhotoLibrary 代表着整个Photos app的asset和collections的抽象，他是一个单例，主要是用于申请访问相册权限，处理改变还有监听改变的功能。
+	
+	//获取当前授权状态
+	+ (PHAuthorizationStatus)authorizationStatus;
+	//请求授权，并返回授权状态
+	+ (void)requestAuthorization:(void(^)(PHAuthorizationStatus status))handler;
+
+由于 PHAsset, PHAssetCollection, 和 PHCollectionList 的都是不可变的，因此，当你需要改变的时候，需要提供给 PHPhotoLibrary 一个 change block。
+
+	//将一张图片存到相册
+	- (void)addNewAssetWithImage:(UIImage *)image toAlbum:(PHAssetCollection *)album {
+    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+        // Request creating an asset from the image.
+        PHAssetChangeRequest *createAssetRequest = [PHAssetChangeRequest creationRequestForAssetFromImage:image];
+         // Request editing the album.
+        PHAssetCollectionChangeRequest *albumChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:album];
+         // Get a placeholder for the new asset and add it to the album editing request.
+        PHObjectPlaceholder *assetPlaceholder = [createAssetRequest placeholderForCreatedAsset];        [albumChangeRequest addAssets:@[ assetPlaceholder ]];
+     } completionHandler:^(BOOL success, NSError *error) {
+        NSLog(@"Finished adding asset. %@", (success ? @"Success" : error));
+    }];
+	}
+需要注意的是，每次执行 performChanges:completionHandler: or performChangesAndWait:error: 时，系统都会弹出对话框来询问是否允许此操作。批量处理的话需要放到一个 block 里。
+
+
+	//用于注册和取消注册观察者。观察者需要遵守PHPhotoLibraryChangeObserver协议
+	- (void)registerChangeObserver:(id<PHPhotoLibraryChangeObserver>)observer;
+	- (void)unregisterChangeObserver:(id<PHPhotoLibraryChangeObserver>)observer;
+
+只要你执行过  fetchAssetsWithOptions: 方法。Photos框架会自动记录这些你感兴趣的item，如果它们发生改变，就会通知你。
+
+##2.PHAsset & PHCollection & PHFetchResult
+	
+###1.PHAsset代表一个资源，可能是照片、视频或Live Photo.
+
