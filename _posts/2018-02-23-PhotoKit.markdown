@@ -28,7 +28,8 @@ PHPhotoLibrary 代表着整个Photos app的asset和collections的抽象，他是
          // Request editing the album.
         PHAssetCollectionChangeRequest *albumChangeRequest = [PHAssetCollectionChangeRequest changeRequestForAssetCollection:album];
          // Get a placeholder for the new asset and add it to the album editing request.
-        PHObjectPlaceholder *assetPlaceholder = [createAssetRequest placeholderForCreatedAsset];        [albumChangeRequest addAssets:@[ assetPlaceholder ]];
+        PHObjectPlaceholder *assetPlaceholder = [createAssetRequest placeholderForCreatedAsset];        
+        [albumChangeRequest addAssets:@[ assetPlaceholder ]];
      } completionHandler:^(BOOL success, NSError *error) {
         NSLog(@"Finished adding asset. %@", (success ? @"Success" : error));
     }];
