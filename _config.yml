@@ -27,7 +27,7 @@ github_username: YaoSu
 
 # Build settings
 markdown: kramdown
-theme: minima
+theme: jekyll-theme-architect
 #theme: minimal-mistakes-jekyll
 
 plugins:
